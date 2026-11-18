@@ -1,0 +1,10 @@
+.env
+.venv
+output
+state
+cache
+assets
+__pycache__
+.pytest_cache
+.git
+secrets
