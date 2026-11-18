@@ -1,0 +1,24 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# pipeline products
+output/
+state/
+cache/
+
+# licensed assets are not committed
+assets/music/**/*.*
+assets/sfx/*.*
+assets/fonts/*.*
+!assets/**/.gitkeep
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# OAuth client secret and per-channel YouTube tokens - never commit
+secrets/
