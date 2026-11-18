@@ -1,0 +1,14 @@
+# Python 3.12. Versions are pinned; upgrade deliberately.
+pydantic==2.13.5      # typed models mirroring the JSON Schema
+jsonschema==4.26.0    # used by the supplied validate_script.py
+requests==2.34.2      # HTTP for ElevenLabs / OpenAI / BFL
+tenacity==9.1.4       # retries with exponential backoff on 429/5xx
+num2words==0.5.14     # numbers -> words for voiceover/subtitle alignment
+Pillow==12.3.0        # diagrams, image post-processing
+pytest==9.1.1         # tests
+
+# YouTube upload (`python -m pipeline upload`): Google OAuth. Versions checked on PyPI on 2026-11-16 —
+# both are the latest releases and fit each other (google-auth-oauthlib 1.5.0 needs google-auth >=2.15.0,<3.0.0).
+# The YouTube Data API itself is called over plain HTTPS with `requests`, so google-api-python-client is not needed.
+google-auth==2.62.2            # credentials, token refresh, authorised requests session
+google-auth-oauthlib==1.5.0    # first login in the browser ("Desktop app" OAuth client, local redirect)

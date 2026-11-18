@@ -1,0 +1,415 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "video_script.schema.json",
+  "title": "VideoScript",
+  "description": "Contract between the creative layer (Opus) and the production pipeline (written by Fable). One file = one video. The file is read-only for the pipeline: runtime data (audio paths, real scene durations, upload ids) goes to a separate state file owned by the pipeline, keyed by video_id and scene_id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "video_id", "channel_id", "niche", "language", "format",
+    "status", "editorial", "seo", "thumbnail", "production", "localization",
+    "sections", "distribution", "qa"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "video_id": {
+      "type": "string",
+      "pattern": "^[a-z]+-[0-9]{4}-[a-z0-9-]+$",
+      "description": "<niche prefix>-<4-digit counter>-<slug>. Used as the folder name for all assets."
+    },
+    "channel_id": { "type": "string", "minLength": 1 },
+    "niche": { "enum": ["business_stories", "tech_disasters", "behavior_science"] },
+    "language": { "const": "en-US" },
+    "format": { "enum": ["long", "short"] },
+    "status": {
+      "enum": ["draft", "needs_review", "approved", "rejected"],
+      "description": "The pipeline renders only status=approved. Approval is a human action."
+    },
+    "created_by": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+
+    "editorial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["working_title", "logline", "original_angle", "target_duration_sec", "sources"],
+      "properties": {
+        "working_title": { "type": "string" },
+        "logline": { "type": "string", "maxLength": 200 },
+        "original_angle": {
+          "type": "string",
+          "minLength": 40,
+          "description": "What this video adds beyond a retelling. Required: protects against YouTube's inauthentic-content review."
+        },
+        "target_duration_sec": { "type": "integer", "minimum": 30, "maximum": 1800 },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/source" }
+        }
+      }
+    },
+
+    "seo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title_seo", "description", "youtube_tags", "category_id", "made_for_kids", "contains_synthetic_media"],
+      "properties": {
+        "title_seo": { "type": "string", "minLength": 10, "maxLength": 100 },
+        "title_variants": { "type": "array", "items": { "type": "string", "maxLength": 100 }, "maxItems": 3 },
+        "description": {
+          "type": "string",
+          "maxLength": 5000,
+          "description": "Placeholders filled by the pipeline after TTS: {{CHAPTERS}} (from section start times), {{SOURCES}} (from editorial.sources)."
+        },
+        "youtube_tags": { "type": "array", "items": { "type": "string", "minLength": 2 }, "maxItems": 30 },
+        "category_id": { "type": "integer", "description": "YouTube category: 27 Education, 28 Science & Technology." },
+        "made_for_kids": { "type": "boolean" },
+        "contains_synthetic_media": {
+          "type": "boolean",
+          "description": "true if any frame could be mistaken for real footage of real people, places or events. Stylized illustrations -> false."
+        }
+      }
+    },
+
+    "thumbnail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image_prompt", "text_overlay"],
+      "properties": {
+        "image_prompt": { "type": "string", "minLength": 20 },
+        "text_overlay": { "type": "string", "maxLength": 24, "description": "Rendered by code, never by the image model." },
+        "text_overlay_color": { "$ref": "#/$defs/hex_color" }
+      }
+    },
+
+    "production": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["aspect_ratio", "resolution", "fps", "pacing", "tts", "visual_style", "subtitles", "music", "audio_stems"],
+      "properties": {
+        "audio_stems": {
+          "type": "boolean",
+          "description": "Render voice, music and sfx as separate stems in addition to the final mix. Required for dubbed tracks: each language track = that language's voice + the same music/sfx bed, cut to the master video length."
+        },
+        "aspect_ratio": { "enum": ["16:9", "9:16"] },
+        "resolution": { "enum": ["1920x1080", "1080x1920"] },
+        "fps": { "enum": [24, 25, 30] },
+        "pacing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["wpm", "scene_min_sec", "scene_max_sec"],
+          "properties": {
+            "wpm": { "type": "integer", "minimum": 110, "maximum": 190 },
+            "scene_min_sec": { "type": "number", "minimum": 2 },
+            "scene_max_sec": { "type": "number", "maximum": 12 }
+          },
+          "description": "Scene length is NOT set in the script. Real duration comes from TTS alignment; these values only drive the word-count check in the validator."
+        },
+        "tts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider", "voice_id", "model_id", "stitching"],
+          "properties": {
+            "provider": { "const": "elevenlabs" },
+            "voice_id": { "type": "string" },
+            "model_id": { "type": "string" },
+            "voice_settings": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "stability": { "type": "number", "minimum": 0, "maximum": 1 },
+                "similarity_boost": { "type": "number", "minimum": 0, "maximum": 1 },
+                "style": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            },
+            "stitching": {
+              "enum": ["previous_next_text", "none"],
+              "description": "previous_next_text: one TTS request per scene, passing neighbouring scenes as previous_text/next_text so intonation stays continuous."
+            }
+          }
+        },
+        "visual_style": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["style_id", "image_provider", "global_prompt_suffix", "negative_prompt", "seed_strategy"],
+          "properties": {
+            "style_id": { "type": "string" },
+            "image_provider": {
+              "enum": ["flux", "gpt_image", "nano_banana", "ideogram"],
+              "description": "Only providers with an official API. Midjourney has no official API and its ToS forbid automation."
+            },
+            "global_prompt_suffix": { "type": "string", "description": "Appended to every scene image_prompt. Keeps one look across ~100 images." },
+            "negative_prompt": { "type": "string" },
+            "seed_strategy": { "enum": ["fixed_per_video", "fixed_per_section", "random"] }
+          }
+        },
+        "subtitles": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["style", "font", "max_words_per_chunk", "highlight_color", "position", "burn_in", "caption_tracks"],
+          "properties": {
+            "burn_in": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["long", "shorts"],
+              "properties": {
+                "long": { "type": "boolean" },
+                "shorts": { "type": "boolean" }
+              },
+              "description": "Burned-in subtitles lock the video to one language. Long-form: false (one video serves every dubbed audio track). Shorts: true."
+            },
+            "caption_tracks": {
+              "type": "boolean",
+              "description": "Export SRT per language from the TTS timings and upload as YouTube caption tracks."
+            },
+            "style": { "enum": ["yellow_dynamic", "plain"] },
+            "font": { "type": "string" },
+            "max_words_per_chunk": { "type": "integer", "minimum": 1, "maximum": 6 },
+            "base_color": { "$ref": "#/$defs/hex_color" },
+            "highlight_color": { "$ref": "#/$defs/hex_color" },
+            "position": { "enum": ["bottom_center", "center"] }
+          }
+        },
+        "music": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "default_mood", "ducking_db"],
+          "properties": {
+            "source": { "enum": ["youtube_audio_library", "licensed_library"] },
+            "default_mood": { "$ref": "#/$defs/music_mood" },
+            "ducking_db": { "type": "number", "maximum": 0 }
+          }
+        },
+        "entities": {
+          "type": "array",
+          "description": "Recurring things that must look the same across scenes. Their visual_description is injected into prompts of scenes that reference them.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["entity_id", "kind", "visual_description"],
+            "properties": {
+              "entity_id": { "$ref": "#/$defs/slug" },
+              "kind": { "enum": ["character", "place", "object"] },
+              "visual_description": { "type": "string", "minLength": 20 }
+            }
+          }
+        },
+        "pronunciation": {
+          "type": "array",
+          "description": "Replacements applied to voiceover_text before TTS only. Subtitles keep the original spelling.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["term", "say_as"],
+            "properties": {
+              "term": { "type": "string" },
+              "say_as": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "localization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["auto_dubbing", "on_screen_text_policy", "custom_tracks"],
+      "description": "One master video, many audio tracks (YouTube multi-language audio).",
+      "properties": {
+        "auto_dubbing": { "type": "boolean", "description": "Let YouTube auto-dub. Free; used for every video by default." },
+        "on_screen_text_policy": {
+          "enum": ["language_neutral", "english_ok"],
+          "description": "language_neutral: on-screen text limited to numbers, symbols and icons, so the picture works under any audio track."
+        },
+        "custom_tracks": {
+          "type": "array",
+          "description": "Own high-quality dubs (ElevenLabs), added later for videos that perform well.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["language", "voice_id", "status"],
+            "properties": {
+              "language": { "type": "string", "pattern": "^[a-z]{2}-[A-Z]{2}$" },
+              "voice_id": { "type": "string" },
+              "status": { "enum": ["planned", "rendered", "uploaded"] }
+            }
+          }
+        }
+      }
+    },
+
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Sections become YouTube chapters (first chapter must start at 0:00, each at least 10 s).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section_id", "chapter_title", "scenes"],
+        "properties": {
+          "section_id": { "type": "string", "pattern": "^sec[0-9]{2}$" },
+          "chapter_title": { "type": "string", "maxLength": 60 },
+          "music_mood": { "$ref": "#/$defs/music_mood" },
+          "scenes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/scene" } }
+        }
+      }
+    },
+
+    "shorts": {
+      "type": "array",
+      "description": "Vertical cuts assembled from existing scenes; no new generation except the hook line.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["short_id", "scene_ids", "reframe"],
+        "properties": {
+          "short_id": { "type": "string" },
+          "scene_ids": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/scene_id" } },
+          "hook_override_text": { "type": "string", "description": "Extra TTS line prepended to the short." },
+          "reframe": { "enum": ["blur_background", "center_crop", "pan_scan"] },
+          "end_card_text": { "type": "string", "maxLength": 40 }
+        }
+      }
+    },
+
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["telegram_brief"],
+      "properties": {
+        "telegram_brief": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Input for the RU adapter LLM. The adapter writes its posts to a separate file; it never edits this one.",
+          "required": ["target_language", "angle_ru", "key_facts", "post_formats", "max_caption_chars"],
+          "properties": {
+            "target_language": { "const": "ru" },
+            "angle_ru": { "type": "string", "minLength": 30 },
+            "key_facts": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["fact", "source_ref"],
+                "properties": {
+                  "fact": { "type": "string" },
+                  "source_ref": { "type": "string" }
+                }
+              }
+            },
+            "post_formats": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "enum": ["story_post", "carousel", "quiz_poll", "longread_telegraph"] }
+            },
+            "image_scene_ids": { "type": "array", "maxItems": 10, "items": { "$ref": "#/$defs/scene_id" } },
+            "do_not_translate": { "type": "array", "items": { "type": "string" } },
+            "max_caption_chars": { "type": "integer", "maximum": 4096, "description": "1024 for a photo caption, 4096 for a text-only message." }
+          }
+        }
+      }
+    },
+
+    "qa": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["facts_verified", "no_photoreal_real_people", "music_licensed", "originality_note"],
+      "properties": {
+        "facts_verified": { "type": "boolean" },
+        "reviewer": { "type": ["string", "null"] },
+        "no_photoreal_real_people": { "type": "boolean" },
+        "music_licensed": { "type": "boolean" },
+        "originality_note": { "type": "string", "minLength": 20 },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+
+  "$defs": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "scene_id": { "type": "string", "pattern": "^s[0-9]{3}$" },
+    "hex_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "music_mood": { "enum": ["tense_minimal", "curious_pulse", "dread_drone", "uplifting_resolve", "reflective_piano"] },
+
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "title", "url", "kind"],
+      "properties": {
+        "source_id": { "type": "string", "pattern": "^src_[a-z0-9_]+$" },
+        "title": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "kind": { "enum": ["primary", "secondary"] }
+      }
+    },
+
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scene_id", "beat", "voiceover_text", "visual", "source_refs"],
+      "properties": {
+        "scene_id": { "$ref": "#/$defs/scene_id" },
+        "beat": { "enum": ["hook", "context", "build", "turn", "climax", "payoff", "outro"] },
+        "voiceover_text": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Exactly what ElevenLabs reads. Numbers may be spelled out for correct pronunciation."
+        },
+        "subtitle_text": {
+          "type": "string",
+          "description": "Optional on-screen version (digits, symbols). Defaults to voiceover_text. Must say the same words in the same order; only the notation may differ."
+        },
+        "emphasis_words": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Words or phrases (as they appear in subtitles) to show in highlight_color."
+        },
+        "visual": { "$ref": "#/$defs/visual" },
+        "sfx": { "enum": ["low_boom", "whoosh", "error_beep", "alarm_rise", "typing", "cash_register"] },
+        "source_refs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "visual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "motion", "transition_in"],
+      "properties": {
+        "source": {
+          "enum": ["generate", "stock", "reuse", "diagram"],
+          "description": "generate: image model. stock: Pexels/Pixabay search. reuse: same image as an earlier scene with a different camera move. diagram: rendered by code; use for every number, date or count, since image models draw text badly."
+        },
+        "image_prompt": { "type": "string", "minLength": 20, "description": "Subject only; style comes from visual_style.global_prompt_suffix." },
+        "entity_refs": { "type": "array", "items": { "$ref": "#/$defs/slug" } },
+        "stock_query": { "type": "string" },
+        "reuse_scene_id": { "$ref": "#/$defs/scene_id" },
+        "diagram": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["template", "params"],
+          "properties": {
+            "template": { "enum": ["big_number", "counter", "icon_grid", "timeline", "bar_compare"] },
+            "params": { "type": "object", "description": "With on_screen_text_policy=language_neutral: numbers, currency, units and icon names only, no English phrases." }
+          }
+        },
+        "motion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "enum": ["static", "zoom_in", "zoom_out", "pan_left", "pan_right", "pan_up", "pan_down"] },
+            "intensity": { "type": "number", "minimum": 0, "maximum": 0.3, "description": "Fraction of frame size travelled over the scene (Ken Burns)." }
+          }
+        },
+        "transition_in": { "enum": ["cut", "crossfade", "dip_to_black", "whip"] }
+      },
+      "allOf": [
+        { "if": { "properties": { "source": { "const": "generate" } } }, "then": { "required": ["image_prompt"] } },
+        { "if": { "properties": { "source": { "const": "stock" } } }, "then": { "required": ["stock_query"] } },
+        { "if": { "properties": { "source": { "const": "reuse" } } }, "then": { "required": ["reuse_scene_id"] } },
+        { "if": { "properties": { "source": { "const": "diagram" } } }, "then": { "required": ["diagram"] } }
+      ]
+    }
+  }
+}

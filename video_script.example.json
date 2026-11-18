@@ -1,0 +1,399 @@
+{
+  "schema_version": "1.0.0",
+  "video_id": "tech-0001-knight-capital",
+  "channel_id": "yt_tech_disasters_en",
+  "niche": "tech_disasters",
+  "language": "en-US",
+  "format": "long",
+  "status": "needs_review",
+  "created_by": "claude-opus-5.5",
+  "created_at": "2026-11-15T02:00:00+03:00",
+
+  "editorial": {
+    "working_title": "The $460 Million Deploy",
+    "logline": "One server out of eight missed an update, and a Wall Street firm lost over $460 million in 45 minutes.",
+    "original_angle": "Told from an engineer's point of view: what a safe deploy checklist would have caught at each step. The closing section is the creator's own commentary, not a retelling.",
+    "target_duration_sec": 600,
+    "sources": [
+      {
+        "source_id": "src_sec_pr",
+        "title": "SEC Press Release 2013-222: SEC Charges Knight Capital With Violations of Market Access Rule",
+        "url": "https://www.sec.gov/news/press-release/2013-222",
+        "kind": "primary"
+      },
+      {
+        "source_id": "src_sec_order",
+        "title": "SEC Order, In the Matter of Knight Capital Americas LLC, Release No. 70694 (Oct 16, 2013)",
+        "url": "https://www.sec.gov/litigation/admin/2013/34-70694.pdf",
+        "kind": "primary"
+      }
+    ]
+  },
+
+  "seo": {
+    "title_seo": "How One Forgotten Server Lost $460 Million in 45 Minutes",
+    "title_variants": [
+      "The Deploy That Destroyed a Wall Street Giant",
+      "$460,000,000 Lost Because of One Old Flag"
+    ],
+    "description": "On August 1, 2012, Knight Capital's trading router sent millions of unintended orders in 45 minutes. Here is exactly how it happened, step by step, based on the SEC's own findings.\n\n{{CHAPTERS}}\n\nSources:\n{{SOURCES}}",
+    "youtube_tags": [
+      "knight capital",
+      "software disaster",
+      "deployment failure",
+      "wall street glitch",
+      "tech history",
+      "software engineering"
+    ],
+    "category_id": 28,
+    "made_for_kids": false,
+    "contains_synthetic_media": false
+  },
+
+  "thumbnail": {
+    "image_prompt": "a single server rack glowing red in a dark row of seven calm blue server racks, dramatic low angle, cinematic",
+    "text_overlay": "$460M IN 45 MIN",
+    "text_overlay_color": "#FFD400"
+  },
+
+  "production": {
+    "audio_stems": true,
+    "aspect_ratio": "16:9",
+    "resolution": "1920x1080",
+    "fps": 30,
+    "pacing": {
+      "wpm": 150,
+      "scene_min_sec": 4,
+      "scene_max_sec": 7
+    },
+    "tts": {
+      "provider": "elevenlabs",
+      "voice_id": "VOICE_ID_NARRATOR_US_MALE",
+      "model_id": "eleven_multilingual_v2",
+      "voice_settings": {
+        "stability": 0.45,
+        "similarity_boost": 0.8,
+        "style": 0.15
+      },
+      "stitching": "previous_next_text"
+    },
+    "visual_style": {
+      "style_id": "noir_editorial_v1",
+      "image_provider": "flux",
+      "global_prompt_suffix": "editorial illustration, muted teal and amber palette, film grain, dramatic chiaroscuro lighting, wide 16:9 composition, no text, no logos",
+      "negative_prompt": "text, letters, watermark, logo, photorealistic face of a real person",
+      "seed_strategy": "fixed_per_video"
+    },
+    "subtitles": {
+      "burn_in": { "long": false, "shorts": true },
+      "caption_tracks": true,
+      "style": "yellow_dynamic",
+      "font": "Montserrat ExtraBold",
+      "max_words_per_chunk": 3,
+      "base_color": "#FFFFFF",
+      "highlight_color": "#FFD400",
+      "position": "bottom_center"
+    },
+    "music": {
+      "source": "youtube_audio_library",
+      "default_mood": "tense_minimal",
+      "ducking_db": -18
+    },
+    "entities": [
+      {
+        "entity_id": "server_row",
+        "kind": "object",
+        "visual_description": "a row of eight tall black server racks with blue status lights in a cold data center"
+      },
+      {
+        "entity_id": "trading_floor",
+        "kind": "place",
+        "visual_description": "a 2012-era trading floor with rows of multi-monitor desks, early morning light, anonymous silhouettes only"
+      },
+      {
+        "entity_id": "technician",
+        "kind": "character",
+        "visual_description": "an anonymous engineer seen from behind, dark hoodie, lit by a laptop screen; never show the face"
+      }
+    ],
+    "pronunciation": [
+      { "term": "SMARS", "say_as": "smarz" },
+      { "term": "NYSE", "say_as": "N Y S E" }
+    ]
+  },
+
+  "localization": {
+    "auto_dubbing": true,
+    "on_screen_text_policy": "language_neutral",
+    "custom_tracks": [
+      { "language": "de-DE", "voice_id": "VOICE_ID_NARRATOR_DE", "status": "planned" },
+      { "language": "es-ES", "voice_id": "VOICE_ID_NARRATOR_ES", "status": "planned" }
+    ]
+  },
+
+  "sections": [
+    {
+      "section_id": "sec01",
+      "chapter_title": "45 Minutes",
+      "music_mood": "tense_minimal",
+      "scenes": [
+        {
+          "scene_id": "s001",
+          "beat": "hook",
+          "voiceover_text": "August first, 2012. One of Wall Street's biggest traders starts a perfectly ordinary morning.",
+          "subtitle_text": "August 1st, 2012. One of Wall Street's biggest traders starts a perfectly ordinary morning.",
+          "emphasis_words": ["ordinary"],
+          "visual": {
+            "source": "generate",
+            "image_prompt": "wide shot of a quiet trading floor at dawn, monitors switching on one by one, calm before the storm",
+            "entity_refs": ["trading_floor"],
+            "motion": { "type": "zoom_in", "intensity": 0.06 },
+            "transition_in": "dip_to_black"
+          },
+          "source_refs": ["src_sec_pr"]
+        },
+        {
+          "scene_id": "s002",
+          "beat": "hook",
+          "voiceover_text": "In forty-five minutes, it piles up positions that will cost it over four hundred sixty million dollars.",
+          "subtitle_text": "In 45 minutes, it piles up positions that will cost it over $460 million.",
+          "emphasis_words": ["$460 million"],
+          "visual": {
+            "source": "diagram",
+            "diagram": {
+              "template": "big_number",
+              "params": { "value": "$460,000,000", "sub_value": "45 min" }
+            },
+            "motion": { "type": "static" },
+            "transition_in": "cut"
+          },
+          "sfx": "low_boom",
+          "source_refs": ["src_sec_order"]
+        },
+        {
+          "scene_id": "s003",
+          "beat": "hook",
+          "voiceover_text": "No hackers. No market crash. Just one forgotten piece of code.",
+          "emphasis_words": ["forgotten"],
+          "visual": {
+            "source": "generate",
+            "image_prompt": "extreme close-up of old green source code on a dusty CRT-style monitor, one line faintly glowing",
+            "motion": { "type": "pan_right", "intensity": 0.05 },
+            "transition_in": "crossfade"
+          },
+          "source_refs": ["src_sec_order"]
+        },
+        {
+          "scene_id": "s004",
+          "beat": "hook",
+          "voiceover_text": "This is the story of how a single server out of eight nearly destroyed a company.",
+          "emphasis_words": ["single server"],
+          "visual": {
+            "source": "generate",
+            "image_prompt": "the row of servers, the eighth rack glowing ominous red while the other seven glow blue",
+            "entity_refs": ["server_row"],
+            "motion": { "type": "zoom_out", "intensity": 0.08 },
+            "transition_in": "crossfade"
+          },
+          "source_refs": ["src_sec_order"]
+        }
+      ]
+    },
+    {
+      "section_id": "sec02",
+      "chapter_title": "The Machine",
+      "music_mood": "curious_pulse",
+      "scenes": [
+        {
+          "scene_id": "s005",
+          "beat": "context",
+          "voiceover_text": "Knight Capital was a market maker, standing between ordinary investors and the stock exchanges.",
+          "visual": {
+            "source": "generate",
+            "image_prompt": "isometric illustration of order flow: small figures on the left, a central glowing hub, stock exchange buildings on the right",
+            "motion": { "type": "pan_left", "intensity": 0.05 },
+            "transition_in": "crossfade"
+          },
+          "source_refs": ["src_sec_order"]
+        },
+        {
+          "scene_id": "s006",
+          "beat": "context",
+          "voiceover_text": "At its heart sat a router called SMARS, which split big orders into smaller ones.",
+          "emphasis_words": ["SMARS"],
+          "visual": {
+            "source": "generate",
+            "image_prompt": "a large glowing block splitting into dozens of small cubes flowing along circuit-board paths",
+            "motion": { "type": "zoom_in", "intensity": 0.06 },
+            "transition_in": "crossfade"
+          },
+          "source_refs": ["src_sec_order"]
+        },
+        {
+          "scene_id": "s007",
+          "beat": "build",
+          "voiceover_text": "Buried inside SMARS was old code called Power Peg, unused for almost a decade.",
+          "emphasis_words": ["Power Peg"],
+          "visual": {
+            "source": "reuse",
+            "reuse_scene_id": "s003",
+            "motion": { "type": "zoom_in", "intensity": 0.12 },
+            "transition_in": "crossfade"
+          },
+          "source_refs": ["src_sec_order"]
+        },
+        {
+          "scene_id": "s008",
+          "beat": "build",
+          "voiceover_text": "Nobody deleted it. It just sat there, switched off, waiting.",
+          "emphasis_words": ["waiting"],
+          "visual": {
+            "source": "generate",
+            "image_prompt": "a dusty unplugged lever switch in a dark machine room, a single ray of light on it",
+            "motion": { "type": "zoom_in", "intensity": 0.04 },
+            "transition_in": "crossfade"
+          },
+          "source_refs": ["src_sec_order"]
+        }
+      ]
+    },
+    {
+      "section_id": "sec03",
+      "chapter_title": "The Deploy",
+      "music_mood": "tense_minimal",
+      "scenes": [
+        {
+          "scene_id": "s009",
+          "beat": "build",
+          "voiceover_text": "In the days before launch, a technician copied the new code onto eight servers, one by one.",
+          "visual": {
+            "source": "generate",
+            "image_prompt": "engineer seen from behind at night, laptop light on the face-hidden silhouette, server racks in the background",
+            "entity_refs": ["technician", "server_row"],
+            "motion": { "type": "pan_right", "intensity": 0.05 },
+            "transition_in": "crossfade"
+          },
+          "source_refs": ["src_sec_order"]
+        },
+        {
+          "scene_id": "s010",
+          "beat": "turn",
+          "voiceover_text": "Seven servers got the update. The eighth one didn't. And nobody noticed.",
+          "emphasis_words": ["eighth"],
+          "visual": {
+            "source": "diagram",
+            "diagram": {
+              "template": "icon_grid",
+              "params": { "icon": "server", "total": 8, "highlight_index": 7, "highlight_mark": "x" }
+            },
+            "motion": { "type": "static" },
+            "transition_in": "cut"
+          },
+          "sfx": "error_beep",
+          "source_refs": ["src_sec_order"]
+        },
+        {
+          "scene_id": "s011",
+          "beat": "turn",
+          "voiceover_text": "Worse, the new code reused an old switch, the very flag that once woke up Power Peg.",
+          "emphasis_words": ["reused"],
+          "visual": {
+            "source": "reuse",
+            "reuse_scene_id": "s008",
+            "motion": { "type": "zoom_in", "intensity": 0.1 },
+            "transition_in": "crossfade"
+          },
+          "source_refs": ["src_sec_order"]
+        }
+      ]
+    },
+    {
+      "section_id": "sec04",
+      "chapter_title": "97 Warnings",
+      "music_mood": "dread_drone",
+      "scenes": [
+        {
+          "scene_id": "s012",
+          "beat": "build",
+          "voiceover_text": "Before the market opened, the system sent ninety-seven automated emails warning about an error.",
+          "subtitle_text": "Before the market opened, the system sent 97 automated emails warning about an error.",
+          "emphasis_words": ["97"],
+          "visual": {
+            "source": "diagram",
+            "diagram": {
+              "template": "counter",
+              "params": { "from": 0, "to": 97, "icon": "mail" }
+            },
+            "motion": { "type": "static" },
+            "transition_in": "cut"
+          },
+          "source_refs": ["src_sec_pr"]
+        },
+        {
+          "scene_id": "s013",
+          "beat": "build",
+          "voiceover_text": "They weren't built as alarms. So nobody read them in time.",
+          "visual": {
+            "source": "generate",
+            "image_prompt": "an overflowing email inbox drawn as a tall stack of glowing envelopes in an empty dark office",
+            "motion": { "type": "pan_up", "intensity": 0.06 },
+            "transition_in": "crossfade"
+          },
+          "source_refs": ["src_sec_order"]
+        },
+        {
+          "scene_id": "s014",
+          "beat": "climax",
+          "voiceover_text": "At nine thirty, the market opened, and the eighth server woke up.",
+          "subtitle_text": "At 9:30, the market opened, and the eighth server woke up.",
+          "emphasis_words": ["woke up"],
+          "visual": {
+            "source": "reuse",
+            "reuse_scene_id": "s004",
+            "motion": { "type": "zoom_in", "intensity": 0.15 },
+            "transition_in": "whip"
+          },
+          "sfx": "alarm_rise",
+          "source_refs": ["src_sec_order"]
+        }
+      ]
+    }
+  ],
+
+  "shorts": [
+    {
+      "short_id": "tech-0001-knight-capital-sh1",
+      "scene_ids": ["s001", "s002", "s010", "s012", "s013"],
+      "hook_override_text": "This company lost $460 million because of one server.",
+      "reframe": "blur_background",
+      "end_card_text": "Full story on the channel"
+    }
+  ],
+
+  "distribution": {
+    "telegram_brief": {
+      "target_language": "ru",
+      "angle_ru": "Одна забытая строчка кода на одном сервере из восьми стоила $460 млн. Разбор как постмортем: что именно сломалось и какой чек-лист деплоя это бы поймал.",
+      "key_facts": [
+        { "fact": "1 августа 2012, за 45 минут торгов роутер SMARS отправил на рынок миллионы ошибочных заявок.", "source_ref": "src_sec_order" },
+        { "fact": "Пытаясь исполнить 212 мелких клиентских заявок, система получила более 4 млн исполнений по 154 акциям, это больше 397 млн акций.", "source_ref": "src_sec_order" },
+        { "fact": "Новый код раскатили на 7 серверов из 8; на восьмом остался старый Power Peg, который активировал переиспользованный флаг.", "source_ref": "src_sec_order" },
+        { "fact": "До открытия рынка система отправила 97 автоматических писем об ошибке; их не восприняли как алерты.", "source_ref": "src_sec_pr" },
+        { "fact": "Итоговый убыток — более $460 млн; SEC оштрафовала компанию на $12 млн.", "source_ref": "src_sec_pr" }
+      ],
+      "post_formats": ["story_post", "quiz_poll"],
+      "image_scene_ids": ["s004", "s010"],
+      "do_not_translate": ["Knight Capital", "SMARS", "Power Peg", "SEC"],
+      "max_caption_chars": 1024
+    }
+  },
+
+  "qa": {
+    "facts_verified": false,
+    "reviewer": null,
+    "no_photoreal_real_people": true,
+    "music_licensed": true,
+    "originality_note": "Engineer's postmortem framing plus the creator's own deploy-checklist commentary in the final section.",
+    "notes": "Example truncated after s014: the full script continues with sec05 'The Bleeding', sec06 'Aftermath' and sec07 'The Checklist' up to ~600 seconds."
+  }
+}
